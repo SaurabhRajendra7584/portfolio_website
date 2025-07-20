@@ -3,11 +3,11 @@
 Welcome to my personal portfolio website! This site showcases my work as a Full Stack Data Developer and Data Analyst.
 
 ## 🚀 Live Demo
-Visit my portfolio: [Your GitHub Pages URL will go here]
+Visit my portfolio: https://saurabhrajendra7584.github.io/portfolio_website/
 
 ## 👨‍💻 About Me
 I'm a passionate Full Stack Data Developer and Data Analyst with expertise in:
-- **Languages & Tools:** Python (Django, Flask, Pandas, NumPy), SQL, Power BI, Tableau
+- **Languages & Tools:** Python (Django, Flask, Pandas, NumPy), SQL, Power BI, Tableau, Snowflake
 - **Databases:** MySQL, PostgreSQL, MongoDB
 - **Cloud & DevOps:** AWS, Azure, Docker, Apache Airflow, Git
 - **Specialties:** Data Analysis, Machine Learning, Web Development, ETL Pipelines
