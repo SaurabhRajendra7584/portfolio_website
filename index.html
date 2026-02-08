@@ -1,14 +1,252 @@
 <!DOCTYPE html>
 <html class="no-js ss-preload" lang="en">
 <head>
-        
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KP2GS6B6');</script>
-<!-- End Google Tag Manager -->
+
+<!-- Data Layer Initialization -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  
+  // Initialize with default page info
+  window.dataLayer.push({
+    'event': 'page_view',
+    'page_title': document.title,
+    'page_path': window.location.pathname,
+    'timestamp': new Date().toISOString()
+  });
+</script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HJBS8KBJJF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HJBS8KBJJF');
+
+    // Adapter: forward any dataLayer object pushes with an `event` field to GA4 via gtag
+    (function(){
+        try {
+            const originalPush = window.dataLayer.push.bind(window.dataLayer);
+            window.dataLayer.push = function(){
+                try {
+                    for (let i = 0; i < arguments.length; i++) {
+                        const obj = arguments[i];
+                        if (obj && typeof obj === 'object' && obj.event && typeof gtag === 'function') {
+                            const ev = obj.event;
+                            const params = Object.assign({}, obj);
+                            delete params.event;
+                            // send to GA4
+                            try { gtag('event', ev, params); } catch(e){}
+                        }
+                    }
+                } catch(e){}
+                return originalPush.apply(null, arguments);
+            };
+        } catch(e) {}
+    })();
+
+  // Event Tracking Implementation
+  (function() {
+    // Track Navigation Clicks
+    function trackNavigationClick(element) {
+      const navText = element.textContent.trim();
+      const navHref = element.getAttribute('href');
+      
+      window.dataLayer.push({
+        'event': 'navigation_click',
+        'nav_text': navText,
+        'nav_link': navHref,
+        'timestamp': new Date().toISOString()
+      });
+    }
+
+    // Track Section Views
+    function trackSectionView(sectionId) {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        window.dataLayer.push({
+          'event': 'section_view',
+          'section_id': sectionId,
+          'section_title': section.querySelector('.text-pretitle')?.textContent || sectionId,
+          'timestamp': new Date().toISOString()
+        });
+      }
+    }
+
+    // Track File Downloads (Resume)
+    function trackDownload(url, fileName) {
+      window.dataLayer.push({
+        'event': 'file_download',
+        'file_name': fileName,
+        'file_url': url,
+        'download_type': 'resume',
+        'timestamp': new Date().toISOString()
+      });
+    }
+
+    // Track Scroll Depth
+    function trackScrollDepth() {
+      let scrollPercentages = [25, 50, 75, 100];
+      let trackedScrolls = {};
+
+      window.addEventListener('scroll', function() {
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (window.scrollY / scrollHeight) * 100;
+
+        for (let percentage of scrollPercentages) {
+          if (scrolled >= percentage && !trackedScrolls[percentage]) {
+            trackedScrolls[percentage] = true;
+            
+            window.dataLayer.push({
+              'event': 'scroll_depth',
+              'scroll_depth_threshold': percentage + '%',
+              'timestamp': new Date().toISOString()
+            });
+          }
+        }
+      });
+    }
+
+    // Track Form Submission (Contact/Email)
+    function trackFormSubmission() {
+      // Track email button clicks
+      const emailButtons = document.querySelectorAll('a[href^="mailto:"]');
+      emailButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          window.dataLayer.push({
+            'event': 'contact_initiated',
+            'contact_type': 'email',
+            'email': this.getAttribute('href').replace('mailto:', ''),
+            'timestamp': new Date().toISOString()
+          });
+        });
+      });
+
+      // Track phone call clicks
+      const phoneButtons = document.querySelectorAll('a[href^="tel:"]');
+      phoneButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          window.dataLayer.push({
+            'event': 'contact_initiated',
+            'contact_type': 'phone',
+            'phone': this.getAttribute('href').replace('tel:', ''),
+            'timestamp': new Date().toISOString()
+          });
+        });
+      });
+    }
+
+    // Track Project/Portfolio Clicks
+    function trackPortfolioClick() {
+      const portfolioLinks = document.querySelectorAll('.folio-list__proj-link');
+      portfolioLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          const projectTitle = this.closest('.folio-list__item').querySelector('.folio-list__item-title')?.textContent || 'Unknown Project';
+          const projectUrl = this.getAttribute('href');
+          
+          window.dataLayer.push({
+            'event': 'portfolio_click',
+            'project_name': projectTitle,
+            'project_url': projectUrl,
+            'click_type': 'project_link',
+            'timestamp': new Date().toISOString()
+          });
+        });
+      });
+
+      // Track portfolio preview modal clicks
+      const portfolioModals = document.querySelectorAll('.folio-list__item-link');
+      portfolioModals.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          const projectTitle = this.querySelector('.folio-list__item-title')?.textContent || 'Unknown Project';
+          
+          window.dataLayer.push({
+            'event': 'portfolio_view',
+            'project_name': projectTitle,
+            'view_type': 'modal_preview',
+            'timestamp': new Date().toISOString()
+          });
+        });
+      });
+    }
+
+    // Track Social Link Clicks
+    function trackSocialLinks() {
+      const socialLinks = document.querySelectorAll('a[href*="github.com"], a[href*="linkedin.com"], a[href*="instagram.com"], a[href*="leetcode.com"], a[href*="x.com"]');
+      
+      socialLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          const href = this.getAttribute('href');
+          let platform = '';
+          
+          if (href.includes('github')) platform = 'GitHub';
+          else if (href.includes('linkedin')) platform = 'LinkedIn';
+          else if (href.includes('instagram')) platform = 'Instagram';
+          else if (href.includes('leetcode')) platform = 'LeetCode';
+          else if (href.includes('x.com')) platform = 'Twitter/X';
+          
+          window.dataLayer.push({
+            'event': 'social_link_click',
+            'platform': platform,
+            'url': href,
+            'timestamp': new Date().toISOString()
+          });
+        });
+      });
+    }
+
+    // Initialize all tracking on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeTracking);
+    } else {
+      initializeTracking();
+    }
+
+    function initializeTracking() {
+      // Navigation tracking
+      const navLinks = document.querySelectorAll('nav a, .home-link');
+      navLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          trackNavigationClick(this);
+        });
+      });
+
+      // Resume download tracking
+      const resumeLink = document.querySelector('a[href*="resume"]');
+      if (resumeLink) {
+        resumeLink.addEventListener('click', function() {
+          trackDownload(this.getAttribute('href'), 'Resume - Saurabh Rajendra Dubey');
+        });
+      }
+
+      // Initialize all tracking functions
+      trackScrollDepth();
+      trackFormSubmission();
+      trackPortfolioClick();
+      trackSocialLinks();
+
+      // Track section entry using Intersection Observer
+      const sections = document.querySelectorAll('section[id]');
+      const observerOptions = {
+        threshold: 0.5
+      };
+
+      const sectionObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            trackSectionView(entry.target.id);
+          }
+        });
+      }, observerOptions);
+
+      sections.forEach(function(section) {
+        sectionObserver.observe(section);
+      });
+    }
+  })();
+</script>
+
     <!--- basic page needs
     ================================================== -->
     <meta charset="utf-8">
@@ -40,6 +278,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KP2GS6B6"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
+
+
     <!-- # preloader
     ================================================== -->
     <div id="preloader">
@@ -103,8 +343,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                         <h1 class="text-huge-title">
                             I am Saurabh Rajendra Dubey, <br>
-                            a Data Scientist <br>
-                            & a Data Engineer. <br>
+                            a Data Engineer. <br>
                         </h1>
                     </div>
 
@@ -144,11 +383,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </h2>
                             <p class="attention-getter" data-animate-el>
                                 
-                                Analytical and detail-oriented Full Stack Data Developer and results-driven Data Analyst with a strong command of Python, SQL, Django, Flask, and Docker, along with hands-on experience in Power BI and Tableau. Skilled in designing scalable data pipelines, developing full-stack web applications, and automating ETL processes. Proven ability to deliver end-to-end solutions, including REST API development, containerization, and interactive data visualizations. Adept at translating complex data into actionable insights to support strategic decision-making.
+                                Aspiring <strong>Data Engineer</strong> with hands-on experience building and managing cloud-based data pipelines on Microsoft Azure. Skilled in designing ETL/ELT workflows using Azure Data Factory and Databricks (PySpark), transforming raw data into analytics-ready datasets stored in Azure Data Lake and Synapse Analytics. Strong command of SQL and Python for data processing, validation, and performance-aware transformations. <br><br>
 
+                                I bring intermediate exposure to machine learning and AI workflows, including data preprocessing, feature engineering, and model evaluation, enabling effective collaboration with analytics and ML teams. Familiar with AWS fundamentals and modern data engineering practices, with a problem-solving mindset focused on reliability, scalability, and business-driven data solutions.
 
                             </p>
-                            <a href="resume\resume_saurabh_rajendra_dubey.pdf" class="btn btn--medium u-fullwidth" data-animate-el>Download Resume</a>
+                            <a href="resume/data_engineer_general_2026.pdf" class="btn btn--medium u-fullwidth" data-animate-el>Download Resume</a>
 
                         </div>
                     </div>
@@ -159,17 +399,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div class="column lg-12">
 
                         <h2 class="text-pretitle" data-animate-el>Technical Skillset</h2>  
-                            <ul class="skills-list h1" data-animate-el>
-
-
-
-                                <li><strong>Languages & Tools:</strong> Python (Django, Flask, Pandas, NumPy, Matplotlib, Seaborn), SQL, Power BI, Tableau, Excel, Dask, OAuth, Snowflake</li><br><br
-                                <li><strong>Databases:</strong> MySQL, PostgreSQL, MongoDB</li><br/><br
-                                <li><strong>Cloud & DevOps:</strong> AWS, Azure, Docker, Apache Airflow, Git</li><br/><br
-                                <li><strong>Other Tools:</strong> Jupyter Notebook, MS Office, Google Sheets</li><br/><br>
-                                <li><strong>Methodologies:</strong> Agile, Scrum</li><br/><br
-                                <li><strong>Soft Skills:</strong> Analytical Thinking, Communication, Problem Solving, Business Acumen</li><br/><br
-                            </ul>
+                        <ul class="skills-list h1" data-animate-el>
+                            <li><strong>Programming & Data:</strong> Python (PySpark, Pandas, NumPy), SQL</li>
+                            <li><strong>Data Engineering & Big Data:</strong> Azure Data Factory, Azure Databricks, Apache Spark, ETL/ELT Pipelines, Batch Data Processing</li>
+                            <li><strong>Cloud Platforms:</strong> Microsoft Azure (Blob Storage, Data Lake Storage Gen2, Synapse Analytics), AWS (S3, EC2 – basics)</li>
+                            <li><strong>Databases & Storage:</strong> Azure Data Lake, Azure Blob Storage, MySQL, PostgreSQL</li>
+                            <li><strong>Analytics & Visualization:</strong> Power BI, SQL-based Analytics</li>
+                            <li><strong>ML / AI:</strong> Data Preprocessing & Feature Engineering, Supervised Learning (Regression, Classification), Model Evaluation & Validation, scikit-learn Pipelines, Basic Model Deployment Concepts</li>
+                            <li><strong>DevOps & Version Control:</strong> Git, GitHub</li>
+                            <li><strong>Tools & Environments:</strong> Jupyter Notebook, VS Code, PyCharm, JIRA</li>
+                            <li><strong>Methodologies:</strong> Agile, Scrum</li>
+                            <li><strong>Soft Skills:</strong> Analytical Thinking, Problem Solving, Clear Communication, Business-Oriented Data Thinking</li>
+                        </ul>
                     </div>
                 </div> <!-- end about-expertise -->
 
@@ -187,12 +428,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <div class="timeline__block">
                                 <div class="timeline__bullet"></div>
                                 <div class="timeline__header">
+                                    <h4 class="timeline__title">Business Analyst Intern</h4>
+                                    <h5 class="timeline__meta">GRT Global Logistics Pvt. Ltd.</h5>
+                                </div>
+                                <div class="timeline__desc">
+                                    <p class="timeline__timeframe">Nov/2025 - Jan/2026</p>
+                                    <ul>
+                                        <li>Gathered, documented, and translated business requirements into functional specifications and user stories</li>
+                                        <li>Collaborated with stakeholders to define scope, priorities, and acceptance criteria</li>
+                                        <li>Managed tasks, sprint planning, and tracking using JIRA under Agile methodology</li>
+                                        <li>Coordinated between business and technical teams to track dependencies, mitigate risks, and resolve issues</li>
+                                        <li>Supported timely project delivery through requirement validation and progress monitoring</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="timeline__block">
+                                <div class="timeline__bullet"></div>
+                                <div class="timeline__header">
                                     <h4 class="timeline__title">Data Analyst</h4>
                                     <h5 class="timeline__meta">Cognifyz Technologies - Remote Internship</h5>
                                 </div>
                                 <div class="timeline__desc">
                                     <p class="timeline__timeframe">June/2025 - July/2025</p>
-                                    <p>Assisted in cleaning and analyzing raw data using Python (Pandas, NumPy) and Excel to support ongoing business reports and insights. Created basic dashboards and visualizations in Power BI/Tableau to help stakeholders monitor key performance indicators. Wrote SQL queries to extract and summarize data from relational databases, aiding in weekly team reporting and decision-making</p>
+                                    <ul>
+                                        <li>Assisted in cleaning and analyzing raw data using Python (Pandas, NumPy) and Excel to support business reports and insights</li>
+                                        <li>Created basic dashboards and visualizations in Power BI/Tableau to help stakeholders monitor KPIs</li>
+                                        <li>Wrote SQL queries to extract and summarize data from relational databases for weekly reporting</li>
+                                    </ul>
                                 </div>
                             </div>
     
@@ -203,7 +466,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <p class="timeline__timeframe">May/2025 - June/2025</p>
                                 </div>
                                 <div class="timeline__desc">
-                                    <p>Independently collected, cleaned, and analyzed large datasets using Python and SQL, ensuring data accuracy and consistency in a remote work setting. Designed and delivered self-driven insights through custom visualizations in Tableau/Power BI to highlight key trends and business metrics. Conducted exploratory and statistical data analysis to support strategic decision-making, communicating findings clearly through reports and presentations.</p>
+                                    <ul>
+                                        <li>Independently collected, cleaned, and analyzed large datasets using Python and SQL in a remote setting</li>
+                                        <li>Designed and delivered self-driven insights through custom visualizations in Tableau/Power BI</li>
+                                        <li>Conducted exploratory and statistical data analysis to support strategic decision-making</li>
+                                        <li>Communicated findings clearly through reports and presentations</li>
+                                    </ul>
                                 </div>
 
                             </div>
@@ -215,7 +483,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <p class="timeline__timeframe">Oct/2024 - Nov/2024 J</p>
                                 </div>
                                 <div class="timeline__desc">
-                                    <p>Developed end-to-end data pipelines for cleaning, preprocessing, and transformation using Pandas and Scikit-learn on datasets like Titanic and Bank Marketing.Implemented machine learning and NLP workflows, including Decision Tree classification and Twitter sentiment analysis with trend visualization.Demonstrated strong grasp of ETL processes, modular Python coding, and data visualization through Matplotlib and Seaborn.</p>
+                                    <ul>
+                                        <li>Developed end-to-end data pipelines for cleaning, preprocessing, and transformation using Pandas and Scikit-learn</li>
+                                        <li>Implemented machine learning and NLP workflows including Decision Tree classification and sentiment analysis</li>
+                                        <li>Built Twitter sentiment analysis with trend visualization</li>
+                                        <li>Demonstrated strong grasp of ETL processes, modular Python coding, and data visualization (Matplotlib, Seaborn)</li>
+                                    </ul>
                                 </div>
 
                             </div>
@@ -288,394 +561,521 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <li class="folio-list__item column" data-animate-el>
                                 <a class="folio-list__item-link" href="#modal-01">
                                     <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/sentischolar.jpg"
-                                             srcset="images/portfolio/sentischolar.jpg 1x, images/portfolio/sentischolar@2x.jpg 2x"  alt="">
-                                    </div>
-                                    
-                                    <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            PaperPulse - Sentiment Analysis of Research Papers.
-                                        </div>
-                                    </div>
-                                </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/sentiment_analysis_of_research-_paper" title="project link">
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                                </a>
-                            </li> <!--end folio-list__item -->
-
-                            <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-02">
-                                    <div class="folio-list__item-pic">
-                                        <img src="images\portfolio\chefmate_img.png" 
-                                             srcset="images\portfolio\chefmate_img.png 1x, images\portfolio\chefmate_img.png 2x" alt="">
-                                    </div>
-                                    
-                                    <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Web Development
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            ChefMate - Recipe sharing platform.
-                                        </div>
-                                    </div>
-                                </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/ChefMate--a-recipe-sharing-platform" title="project link">
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                                </a>
-                            </li> <!--end folio-list__item -->
-
-                            <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-03">
-                                    <div class="folio-list__item-pic">
                                         <img src="images/portfolio/etl_pipeline.png" 
                                              srcset="images/portfolio/etl_pipeline.png 1x, images/portfolio/etl_pipeline.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            Refinr - ETL pipelines for Data processing and CSV cleaning.
-                                        </div
+                                        <div class="folio-list__item-cat">Data Engineering</div>
+                                        <div class="folio-list__item-title">Refinr - ETL Data Processing Pipeline</div>
                                     </div>
                                 </a>
                                 <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Refinr---ETL-pipelines-for-Data-processing-and-CSV-cleaning" title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
                             <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-04">
+                                <a class="folio-list__item-link" href="#modal-02">
                                     <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/task.png"
-                                             srcset="images/portfolio/task.png 1x, images/portfolio/task.png 2x" alt="">
+                                        <img src="images/portfolio/etl_pipeline.png" 
+                                             srcset="images/portfolio/etl_pipeline.png 1x, images/portfolio/etl_pipeline.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Web Development
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            Manageo -  Task management API tool.
-                                        </div>
+                                        <div class="folio-list__item-cat">Data Engineering</div>
+                                        <div class="folio-list__item-title">Automated Sales Data Pipeline - AWS</div>
                                     </div>
                                 </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Manageo---Task-management-API-tool." title="project link">
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/automated-sales-data-pipeline" title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
                             <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-05">
+                                <a class="folio-list__item-link" href="#modal-03">
                                     <div class="folio-list__item-pic">
                                         <img src="images/portfolio/crypto.png" 
                                              srcset="images/portfolio/crypto.png 1x, images/portfolio/crypto.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            ML / Web Development
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            Cryptowatchr - Cryptocurrency price tracker.
-                                        </div>
+                                        <div class="folio-list__item-cat">Machine Learning</div>
+                                        <div class="folio-list__item-title">House Price Prediction - XGBoost & Streamlit</div>
                                     </div>
                                 </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Cryptowatchr---Cryptocurrency-price-tracker." title="project link">
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/House_Price_Prediction" title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-04">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/etl_pipeline.png" 
+                                             srcset="images/portfolio/etl_pipeline.png 1x, images/portfolio/etl_pipeline.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Research & ML</div>
+                                        <div class="folio-list__item-title">Research Paper Sentiment Analysis Tool</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/research-paper-sentiment-analysis-tool" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-05">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/sentischolar.jpg" 
+                                             srcset="images/portfolio/sentischolar.jpg 1x, images/portfolio/sentischolar@2x.jpg 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">NLP / ML</div>
+                                        <div class="folio-list__item-title">Sentiment Analysis - Research Papers</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/sentiment_analysis_of_research-_paper" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
 
                             <li class="folio-list__item column" data-animate-el>
                                 <a class="folio-list__item-link" href="#modal-06">
                                     <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/dashboard.png" 
-                                             srcset="images/portfolio/dashboard.png 1x, images/portfolio/dashboard.png 2x" alt="">
+                                        <img src="images/portfolio/sentischolar.jpg" 
+                                             srcset="images/portfolio/sentischolar.jpg 1x, images/portfolio/sentischolar@2x.jpg 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            Dashlytics - Data visualization sales analysis dashboard.
-                                        </div>
+                                        <div class="folio-list__item-cat">Data Analytics</div>
+                                        <div class="folio-list__item-title">Returnly - E-commerce Return Analysis</div>
                                     </div>
                                 </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Dashlytics---Data-visualization-sales-analysis-dashboard" title="project link">
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/returnly-ecommerce-return-analysis" title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
-
-                             <li class="folio-list__item column" data-animate-el>
+                            <li class="folio-list__item column" data-animate-el>
                                 <a class="folio-list__item-link" href="#modal-07">
                                     <div class="folio-list__item-pic">
                                         <img src="images/portfolio/library.png" 
                                              srcset="images/portfolio/library.png 1x, images/portfolio/library.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                           InvenTrackr - Automated Inventory management system.
-                                        </div>
+                                        <div class="folio-list__item-cat">Data Analytics</div>
+                                        <div class="folio-list__item-title">WorkSight - HR Attrition Report</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/worksight-hr-attrition-report" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-08">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/sentischolar.jpg" 
+                                             srcset="images/portfolio/sentischolar.jpg 1x, images/portfolio/sentischolar@2x.jpg 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Data Analytics</div>
+                                        <div class="folio-list__item-title">EduPulse - Student Performance Analytics</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/edupulse-student-performance" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-09">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/sentischolar.jpg" 
+                                             srcset="images/portfolio/sentischolar.jpg 1x, images/portfolio/sentischolar@2x.jpg 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Backend / API</div>
+                                        <div class="folio-list__item-title">Team Project Planner Tool - Project Management API</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Team-Project-Planner-Tool" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-10">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/dashboard.png" 
+                                             srcset="images/portfolio/dashboard.png 1x, images/portfolio/dashboard.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Data Visualization</div>
+                                        <div class="folio-list__item-title">Dashlytics - Sales Analysis Dashboard</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Dashlytics---Data-visualization-sales-analysis-dashboard." title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-11">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/chatbot.png" 
+                                             srcset="images/portfolio/chatbot.png 1x, images/portfolio/chatbot.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Frontend</div>
+                                        <div class="folio-list__item-title">Mausam - Weather Application</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/MAUSAM---WEAtHER" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-12">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/library.png" 
+                                             srcset="images/portfolio/library.png 1x, images/portfolio/library.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Data Tables & UI</div>
+                                        <div class="folio-list__item-title">Responsive User Data Table</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/responsive_user_data_table" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-13">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/task.png" 
+                                             srcset="images/portfolio/task.png 1x, images/portfolio/task.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Frontend Forms</div>
+                                        <div class="folio-list__item-title">User Registration Form with Validation</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/sd-user-registration-form" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-14">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/dashboard.png" 
+                                             srcset="images/portfolio/dashboard.png 1x, images/portfolio/dashboard.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Analytics Dashboard</div>
+                                        <div class="folio-list__item-title">Userflare - Portfolio Analytics</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Userflare---Real-time-analysis-dashboard-for-portfolio-websites" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-15">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/library.png" 
+                                             srcset="images/portfolio/library.png 1x, images/portfolio/library.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Backend / Django</div>
+                                        <div class="folio-list__item-title">Library Management System</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Library-Management-System" title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-16">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/chatbot.png" 
+                                             srcset="images/portfolio/chatbot.png 1x, images/portfolio/chatbot.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Finance AI</div>
+                                        <div class="folio-list__item-title">FinBuddy - Personal Finance Management</div>
+                                    </div>
+                                </a>
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/FinBuddy---Personal-finance-management-system." title="project link">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                </a>
+                            </li>
+
+                            <li class="folio-list__item column" data-animate-el>
+                                <a class="folio-list__item-link" href="#modal-17">
+                                    <div class="folio-list__item-pic">
+                                        <img src="images/portfolio/library.png" 
+                                             srcset="images/portfolio/library.png 1x, images/portfolio/library.png 2x" alt="">
+                                    </div>
+                                    <div class="folio-list__item-text">
+                                        <div class="folio-list__item-cat">Backend / Logistics</div>
+                                        <div class="folio-list__item-title">InvenTrackr - Inventory Management</div>
                                     </div>
                                 </a>
                                 <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/InvenTrackr---Automated-Inventory-management-system." title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
                             <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-08">
+                                <a class="folio-list__item-link" href="#modal-18">
                                     <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/chatbot.png" 
-                                             srcset="images/portfolio/chatbot.png 1x, images/portfolio/chatbot.png 2x" alt="">
+                                        <img src="images/portfolio/task.png" 
+                                             srcset="images/portfolio/task.png 1x, images/portfolio/task.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            FinBuddy - Personal finance management system.
-                                        </div>
+                                        <div class="folio-list__item-cat">Backend / API</div>
+                                        <div class="folio-list__item-title">Manageo - Task Management API</div>
                                     </div>
                                 </a>
-                                <a class="folio-list__proj-link" href="#" title="project link">
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/Manageo---Task-management-API-tool." title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
                             <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-09">
+                                <a class="folio-list__item-link" href="#modal-19">
                                     <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/face_reco.png" 
-                                             srcset="images/portfolio/face_reco.png 1x, images/portfolio/face_reco.png 2x" alt="">
+                                        <img src="images\portfolio\chefmate_img.png" 
+                                             srcset="images\portfolio\chefmate_img.png 1x, images\portfolio\chefmate_img.png 2x" alt="">
                                     </div>
-                                    
                                     <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            FaceRoll - Face recognition attendance system.
-                                        </div>
+                                        <div class="folio-list__item-cat">Full Stack</div>
+                                        <div class="folio-list__item-title">ChefMate - Recipe Sharing Platform</div>
                                     </div>
                                 </a>
-                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/-FaceRoll---Face-recognition-attendance-system.-div-class-folio-list__item-title-" title="project link">
+                                <a class="folio-list__proj-link" href="https://github.com/SaurabhRajendra7584/ChefMate--a-recipe-sharing-platform" title="project link">
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                 </a>
-                            </li> <!--end folio-list__item -->
-
-                             <li class="folio-list__item column" data-animate-el>
-                                <a class="folio-list__item-link" href="#modal-10">
-                                    <div class="folio-list__item-pic">
-                                        <img src="images/portfolio/library.png" 
-                                             srcset="images/portfolio/library.png 1x, images/portfolio/library.png 2x" alt="">
-                                    </div>
-                                    
-                                    <div class="folio-list__item-text">
-                                        <div class="folio-list__item-cat">
-                                            Machine Learning
-                                        </div>
-                                        <div class="folio-list__item-title">
-                                            Library Management System
-                                        </div>
-                                    </div>
-                                </a>
-                                <a class="folio-list__proj-link" href="#" title="project link">
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                                </a>
-                            </li> <!--end folio-list__item -->
+                            </li>
 
                         </ul> <!-- end folio-list -->
 
                     </div> <!-- end column -->
 
 
-                    <!-- Modal Templates Popup
-                    -------------------------------------------- -->
+                    <!-- Modal Templates Popup -->
                     <div id="modal-01" hidden>
                         <div class="modal-popup">
-                            <img src="images/portfolio/sentischolar.jpg" alt="">
-                
+                            <img src="images/portfolio/etl_pipeline.png" alt="">
                             <div class="modal-popup__desc">
-                                <h5>SentiScholar - Sentiment Analysis of Research Papers.</h5>
-                                <p>PaperPulse is a sentiment analysis system designed to evaluate the emotional tone of academic research papers.
-                                    It leverages the VADER NLP model to classify texts as positive, negative, or neutral.
-                                    The tool aims to assist researchers and reviewers by offering quick sentiment insights into scholarly content..</p>
-                                
+                                <h5>Refinr - ETL Data Processing Pipeline</h5>
+                                <p>An efficient ETL pipeline built to clean, structure, and transform raw CSV data. Automates extraction, validation, and loading of datasets for seamless downstream use in analytics, machine learning, and reporting workflows.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/sentiment_analysis_of_research-_paper" class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/Refinr---ETL-pipelines-for-Data-processing-and-CSV-cleaning" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-02" hidden>
                         <div class="modal-popup">
-                            <img src="images\portfolio\chefmate_img.png" alt="">
-                
+                            <img src="images/portfolio/etl_pipeline.png" alt="">
                             <div class="modal-popup__desc">
-                                <h5>ChefMate - Recipe sharing platform</h5>
-                                <p>ChefMate is a social platform tailored for cooking enthusiasts to share, discover, and celebrate homemade recipes.
-                                    Users can upload recipe images, like posts, follow others, and collaborate within a vibrant culinary community.
-                                    With features like user search and real-time interaction, ChefMate brings the spirit of Instagram to the world of cooking..</p>
-                                
+                                <h5>Automated Sales Data Pipeline - AWS</h5>
+                                <p>A complete end-to-end sales data pipeline where raw order data is ingested, cleaned, and stored in AWS Redshift, then visualized using AWS QuickSight. Demonstrates real-world data engineering practices with cloud infrastructure.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/ChefMate--a-recipe-sharing-platform" class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/automated-sales-data-pipeline" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-03" hidden>
                         <div class="modal-popup">
-                            <img src="images/portfolio/etl_pipeline.png" alt="">
-                
+                            <img src="images/portfolio/crypto.png" alt="">
                             <div class="modal-popup__desc">
-                                <h5>Refinr - ETL Pipelines for Data Processing and CSV cleaning</h5>
-                                <p>Refinr is an efficient ETL pipeline built to clean, structure, and transform raw CSV data.
-                                    It automates the extraction, validation, and loading of datasets for seamless downstream use.
-                                    Ideal for data preprocessing in analytics, machine learning, and reporting workflows..</p>
-                                
+                                <h5>House Price Prediction - XGBoost & Streamlit</h5>
+                                <p>ML-based house price prediction app using XGBoost and Streamlit. Predicts home prices from custom inputs with a clean UI, real-time output, and trained on real-world housing data for accurate predictions.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/Refinr---ETL-pipelines-for-Data-processing-and-CSV-cleaning" class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/House_Price_Prediction" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-04" hidden>
                         <div class="modal-popup">
-                            <img src="images/portfolio/task.png" alt="">
-                
+                            <img src="images/portfolio/etl_pipeline.png" alt="">
                             <div class="modal-popup__desc">
-                                <h5>Manageo – Task management API tool</h5>
-                                <p>Manageo is a lightweight RESTful API for managing tasks, projects, and team collaboration.
-                                    It supports CRUD operations, deadlines, priorities, and task status tracking.
-                                    Built with scalability in mind, it serves as a backend engine for any task-based application.</p>
-                               
+                                <h5>Research Paper Sentiment Analysis Tool</h5>
+                                <p>A multi-format sentiment analysis tool that processes text, PDF, and DOCX files to provide sentiment scores and content summaries. Built with Streamlit for an interactive user experience and VADER NLP model for accurate sentiment classification.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/Manageo---Task-management-API-tool." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/research-paper-sentiment-analysis-tool" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-05" hidden>
                         <div class="modal-popup">
-
-                            <img src="images/portfolio/crypto.png" alt="">
-                
+                            <img src="images/portfolio/sentischolar.jpg" alt="">
                             <div class="modal-popup__desc">
-                                <h5> Cryptowatchr – Cryptocurrency price tracker</h5>
-                                <p>Cryptowatchr is a real-time price tracker for popular cryptocurrencies like Bitcoin and Ethereum.
-                                    It fetches and displays live market data using public APIs with clean visualization.
-                                    Perfect for crypto enthusiasts, traders, or anyone needing quick currency insights.</p>
-                                
+                                <h5>Sentiment Analysis - Research Papers</h5>
+                                <p>Sentiment analysis of research papers using NLP and a pre-trained VADER model for sentiment prediction and summary generation. Helps researchers and reviewers quickly understand the emotional tone and key findings of academic papers.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/Cryptowatchr---Cryptocurrency-price-tracker." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/sentiment_analysis_of_research-_paper" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-06" hidden>
                         <div class="modal-popup">
-                            <img src="images/portfolio/dashboard.png" alt="">
-                
+                            <img src="images/portfolio/sentischolar.jpg" alt="">
                             <div class="modal-popup__desc">
-                                <h5>Dashlytics – Data visualization sales analysis dashboard</h5>
-                                <p>Dashlytics is a dynamic sales dashboard providing interactive data visualizations and performance metrics.
-                                    It helps businesses analyze revenue, customer behavior, and trends using charts and filters.
-                                    Designed for clarity and insights, it empowers smarter decision-making in sales strategy.</p>
-                                
+                                <h5>Returnly - E-commerce Return Analysis</h5>
+                                <p>A product return analytics project that identifies key drivers behind high return rates across product categories and price points. Includes return rate calculations, trend visualizations, and actionable insights for improving customer satisfaction.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/Dashlytics---Data-visualization-sales-analysis-dashboard." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/returnly-ecommerce-return-analysis" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-07" hidden>
                         <div class="modal-popup">
-                            <img src="images\portfolio\library.png" alt="">
-                
+                            <img src="images/portfolio/library.png" alt="">
                             <div class="modal-popup__desc">
-                                <h5>InvenTrackr - Automated Inventory management system</h5>
-                                <p>Designed to track multiple inventories and containers for different agents, 
-                                    this Django app handles complex logistics and stock control. 
-                                    It calculates agent commissions based on inventory movement and sales performance. 
-                                    The system supports real-time updates and multi-agent coordination for efficient 
-                                    inventory tracking. It aims to reduce errors and improve transparency in inventory 
-                                    management. The project combines backend logic with interactive web interfaces.</p>
-                                
+                                <h5>WorkSight - HR Attrition Report</h5>
+                                <p>An end-to-end workforce analytics project analyzing employee attrition trends based on department, age, salary, and tenure. Features comprehensive dashboards and data-driven recommendations to improve employee retention strategies.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/InvenTrackr---Automated-Inventory-management-system." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/worksight-hr-attrition-report" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-08" hidden>
                         <div class="modal-popup">
-                            <img src="images\portfolio\chatbot.png" alt="">
-                
+                            <img src="images/portfolio/sentischolar.jpg" alt="">
                             <div class="modal-popup__desc">
-                                <h5>FinBuddy - Personal finance management system</h5>
-                                <p>Built with Django, this chatbot offers users personalized financial 
-                                    advice and expense analysis through conversational AI. It integrates 
-                                    machine learning models to predict stock market trends and analyze spending 
-                                    patterns. Users can interact with the chatbot to get budgeting tips and investment 
-                                    insights. The platform aims to simplify complex financial decision-making for everyday 
-                                    users. It combines natural language processing and data analytics for a user-friendly 
-                                    finance assistant.</p>
-                                
+                                <h5>EduPulse - Student Performance Analytics</h5>
+                                <p>A student performance analytics and dashboard project that tracks academic metrics, identifies trends, and provides insights for educators. Helps optimize teaching strategies based on data-driven analysis.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/FinBuddy---Personal-finance-management-system." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/edupulse-student-performance" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-09" hidden>
                         <div class="modal-popup">
-                            <img src="images\portfolio\face_reco.png" alt="">
-                
+                            <img src="images/portfolio/sentischolar.jpg" alt="">
                             <div class="modal-popup__desc">
-                                <h5>FaceRoll -  Face-recognition-attendance-system</h5>
-                                <p>This project uses OpenCV to implement face recognition for automatic attendance tracking. 
-                                    The system captures images, identifies registered faces, and marks attendance without manual input. 
-                                    Originally a GUI application, it is being converted into a Django web app for easier access and management. 
-                                    It reduces attendance errors and streamlines tracking in educational or workplace settings. 
-                                    The system also supports real-time updates and attendance reports.</p>
-                                
+                                <h5>Team Project Planner Tool</h5>
+                                <p>A lightweight backend API for managing users, teams, project boards, and tasks with file-based persistence. Supports real-time project coordination and task assignment with robust data management capabilities.</p>
                             </div>
-                
-                            <a href="https://github.com/SaurabhRajendra7584/FaceRoll---Face-recognition-attendance-system." class="modal-popup__details">Project link</a>
+                            <a href="https://github.com/SaurabhRajendra7584/Team-Project-Planner-Tool" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
 
                     <div id="modal-10" hidden>
                         <div class="modal-popup">
-                            <img src="images\portfolio\library.png" alt="">
-                
+                            <img src="images/portfolio/dashboard.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>Dashlytics - Sales Analysis Dashboard</h5>
+                                <p>A dynamic sales dashboard offering real-time data visualizations and performance metrics. Empowers businesses to analyze revenue trends, customer behavior, and performance indicators with interactive charts and filters for informed decision-making.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/Dashlytics---Data-visualization-sales-analysis-dashboard." class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-11" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/chatbot.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>Mausam - Weather Application</h5>
+                                <p>A responsive weather application built with HTML, CSS, and JavaScript that fetches and displays real-time weather data. Features clean UI, location search, and current weather conditions with forecasting capabilities.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/MAUSAM---WEAtHER" class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-12" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/library.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>Responsive User Data Table</h5>
+                                <p>A responsive user data table demonstrating filter and sorting features using HTML, CSS, and JavaScript. Perfect example of modern frontend interactivity with a clean, organized data presentation interface.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/responsive_user_data_table" class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-13" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/task.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>User Registration Form with Validation</h5>
+                                <p>An interactive user registration form with comprehensive client-side validation. Demonstrates form handling best practices, input validation, and user feedback mechanisms for enhanced UX.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/sd-user-registration-form" class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-14" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/dashboard.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>Userflare - Portfolio Analytics Dashboard</h5>
+                                <p>A real-time analysis dashboard specifically designed for portfolio websites. Provides insights into visitor behavior, portfolio interactions, and engagement metrics with live data visualization.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/Userflare---Real-time-analysis-dashboard-for-portfolio-websites" class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-15" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/library.png" alt="">
                             <div class="modal-popup__desc">
                                 <h5>Library Management System</h5>
-                                <p>The Library Management System is a web-based application designed to streamline book 
-                                    inventory and transaction management for libraries. It supports role-based authentication, 
-                                    allowing both admins and users to securely access features according to their permissions. 
-                                    The system tracks book lending, returns, and current availability in real time, reducing manual 
-                                    errors and improving efficiency. It provides an intuitive dashboard for easy monitoring and management 
-                                    of library resources. Overall, this project automates library workflows and ensures smooth, 
-                                    organized operations for staff and patrons alike.</p>
-                                
+                                <p>A comprehensive library management system that automates book checkouts, returns, and user management. Provides an organized, efficient, and user-friendly solution for library administration with role-based access control.</p>
                             </div>
-                
                             <a href="https://github.com/SaurabhRajendra7584/Library-Management-System" class="modal-popup__details">Project link</a>
                         </div>
-                    </div> <!-- end modal -->
+                    </div>
+
+                    <div id="modal-16" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/chatbot.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>FinBuddy - Personal Finance Management</h5>
+                                <p>A personal finance management system that tracks expenses, provides budgeting insights, and offers financial guidance. Built with Django, it helps users make informed financial decisions through conversational AI and ML-powered analysis.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/FinBuddy---Personal-finance-management-system." class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-17" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/library.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>InvenTrackr - Inventory Management</h5>
+                                <p>An automated inventory management system enabling real-time tracking, stock management, and reporting. Streamlines operations for warehouses and businesses with multi-agent coordination and commission tracking capabilities.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/InvenTrackr---Automated-Inventory-management-system." class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-18" hidden>
+                        <div class="modal-popup">
+                            <img src="images/portfolio/task.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>Manageo - Task Management API</h5>
+                                <p>A lightweight RESTful API for managing tasks, projects, and team collaboration. Supports CRUD operations, deadlines, priorities, and task status tracking with scalability in mind for any task-based application.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/Manageo---Task-management-API-tool." class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
+
+                    <div id="modal-19" hidden>
+                        <div class="modal-popup">
+                            <img src="images\portfolio\chefmate_img.png" alt="">
+                            <div class="modal-popup__desc">
+                                <h5>ChefMate - Recipe Sharing Platform</h5>
+                                <p>A full-stack web application and social platform tailored for cooking enthusiasts to share, discover, and celebrate homemade recipes. Features Instagram-like functionality with recipe uploads, likes, follows, and community engagement.</p>
+                            </div>
+                            <a href="https://github.com/SaurabhRajendra7584/ChefMate--a-recipe-sharing-platform" class="modal-popup__details">Project link</a>
+                        </div>
+                    </div>
 
 
                 </div> <!-- end works-portfolio -->

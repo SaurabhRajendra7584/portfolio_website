@@ -528,6 +528,8 @@ body {
 p {
     font-size      : inherit;
     text-rendering : optimizeLegibility;
+    line-height    : 1.75;
+    margin-bottom  : 1.25rem;
 }
 
 a {
@@ -1551,11 +1553,13 @@ hr.fancy::before {
  * -------------------------------------------------------------------- */
 .lead,
 .attention-getter {
-    font-family : var(--font-1);
-    font-weight : 300;
-    font-size   : var(--text-md);
-    line-height : var(--vspace-1_25);
-    color       : var(--color-text-dark);
+    font-family    : var(--font-1);
+    font-weight    : 300;
+    font-size      : var(--text-md);
+    line-height    : 1.85;
+    color          : var(--color-text-dark);
+    letter-spacing : 0.3px;
+    margin-bottom  : 1.5rem;
 }
 
 .pull-quote {
@@ -3435,18 +3439,46 @@ img.u-pull-left {
 }
 
 .about-expertise .skills-list {
-    list-style  : none;
-    margin-top  : var(--vspace-1);
-    margin-left : 0;
+    list-style: none;
+    margin-top: var(--vspace-2);
+    margin-left: 0;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
 .about-expertise .skills-list li {
-    display      : inline-block;
-    padding-left : 0;
+    display       : block;
+    padding       : 1.75rem;
+    margin-bottom : 0;
+    line-height   : 1.9;
+    background    : rgba(255, 255, 255, 0.05);
+    border-left   : 3px solid var(--color-link);
+    border-radius : 4px;
+    transition    : all 0.3s ease;
+    letter-spacing: 0.2px;
 }
 
-.about-expertise .skills-list li:not(:last-child)::after {
-    content : ", ";
+.about-expertise .skills-list li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    padding-left: 2rem;
+    border-left-width: 5px;
+}
+
+.about-expertise .skills-list li strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-link);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.about-expertise .skills-list li strong::before {
+    content: "▸ ";
+    margin-right: 0.5rem;
 }
 
 /* --------------------------------------------------------------------
@@ -3501,19 +3533,23 @@ img.u-pull-left {
 }
 
 .timeline__title {
-    font-family   : var(--font-1);
-    font-weight   : 500;
-    font-size     : var(--text-lg);
-    margin-top    : 0;
-    margin-bottom : var(--vspace-0_125);
+    font-family    : var(--font-1);
+    font-weight    : 600;
+    font-size      : 1.4rem;
+    margin-top     : 0;
+    margin-bottom  : var(--vspace-0_125);
+    letter-spacing : 0.3px;
+    line-height    : 1.5;
 }
 
 .timeline__meta {
-    font-family   : var(--font-1);
-    font-weight   : 300;
-    font-size     : calc(var(--text-size) * 1.1053);
-    margin-top    : 0;
-    margin-bottom : var(--vspace-0_125);
+    font-family    : var(--font-1);
+    font-weight    : 300;
+    font-size      : calc(var(--text-size) * 1.1053);
+    margin-top     : 0;
+    margin-bottom  : var(--vspace-0_125);
+    letter-spacing : 0.2px;
+    line-height    : 1.6;
 }
 
 .timeline__timeframe {
@@ -3723,16 +3759,21 @@ img.u-pull-left {
 }
 
 .folio-list__item-title {
-    font-family : var(--font-1);
-    font-weight : 500;
-    font-size   : var(--text-lg);
+    font-family    : var(--font-1);
+    font-weight    : 600;
+    font-size      : var(--text-lg);
+    line-height    : 1.6;
+    letter-spacing : 0.2px;
 }
 
 .folio-list__item-cat {
-    font-size   : var(--text-sm);
+    font-size   : 1.4rem;
     color       : var(--color-text-light);
     line-height : var(--vspace-0_75);
     margin-left : .2rem;
+    font-weight : 600;
+    text-transform : uppercase;
+    letter-spacing : 0.5px;
 }
 
 .folio-list__proj-link {
@@ -3789,7 +3830,9 @@ img.u-pull-left {
 }
 
 .modal-popup__desc {
-    padding : 0 var(--vspace-1_25) var(--vspace-0_25);
+    padding     : 0 var(--vspace-1_25) var(--vspace-0_25);
+    line-height : 1.8;
+    letter-spacing : 0.2px;
 }
 
 .modal-popup__cat {

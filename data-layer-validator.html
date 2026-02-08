@@ -1,0 +1,238 @@
+<!-- Data Layer Validator & Testing Script -->
+<!-- Add this to index.html temporarily for local testing, or run in browser console -->
+
+<script>
+  // Data Layer Validation & Testing Utility
+  window.DataLayerValidator = {
+    
+    // Store all events for validation
+    events: [],
+    
+    // Initialize validator
+    init: function() {
+      console.clear();
+      console.log('%c=== Data Layer Validator Initialized ===', 'background: #4CAF50; color: white; padding: 10px; font-size: 14px;');
+      
+      // Intercept dataLayer pushes
+      const originalPush = window.dataLayer.push;
+      window.dataLayer.push = function() {
+        for (let i = 0; i < arguments.length; i++) {
+          DataLayerValidator.logEvent(arguments[i]);
+          DataLayerValidator.events.push(arguments[i]);
+        }
+        return originalPush.apply(window.dataLayer, arguments);
+      };
+      
+      console.log('✓ Validator ready. Perform actions on the page to test tracking.');
+      console.log('Commands:');
+      console.log('  - DataLayerValidator.getAll() - Show all captured events');
+      console.log('  - DataLayerValidator.validate() - Validate event structure');
+      console.log('  - DataLayerValidator.getEventsByName("event_name") - Filter events');
+      console.log('  - DataLayerValidator.exportJSON() - Export as JSON');
+    },
+    
+    // Log individual events with formatting
+    logEvent: function(eventData) {
+      if (!eventData.event) return;
+      
+      const event = eventData.event;
+      const bgColor = this.getEventColor(event);
+      
+      console.log(`%c[${event.toUpperCase()}]`, `background: ${bgColor}; color: white; padding: 5px 10px; border-radius: 3px;`, eventData);
+    },
+    
+    // Get color for event type
+    getEventColor: function(eventName) {
+      const colors = {
+        'page_view': '#2196F3',
+        'navigation_click': '#FF9800',
+        'section_view': '#9C27B0',
+        'file_download': '#4CAF50',
+        'scroll_depth': '#F44336',
+        'contact_initiated': '#00BCD4',
+        'portfolio_click': '#FF5722',
+        'portfolio_view': '#E91E63',
+        'social_link_click': '#673AB7'
+      };
+      return colors[eventName] || '#757575';
+    },
+    
+    // Get all events
+    getAll: function() {
+      console.table(this.events);
+      return this.events;
+    },
+    
+    // Get events by name
+    getEventsByName: function(eventName) {
+      const filtered = this.events.filter(e => e.event === eventName);
+      console.table(filtered);
+      return filtered;
+    },
+    
+    // Validate event structure
+    validate: function() {
+      console.log('%c=== Validation Report ===', 'background: #2196F3; color: white; padding: 10px;');
+      
+      const requiredEvents = {
+        'page_view': ['page_title', 'page_path'],
+        'navigation_click': ['nav_text', 'nav_link'],
+        'section_view': ['section_id', 'section_title'],
+        'file_download': ['file_name', 'file_url', 'download_type'],
+        'scroll_depth': ['scroll_depth_threshold'],
+        'contact_initiated': ['contact_type'],
+        'portfolio_click': ['project_name', 'project_url'],
+        'portfolio_view': ['project_name', 'view_type'],
+        'social_link_click': ['platform', 'url']
+      };
+      
+      let validationResults = {};
+      
+      for (let eventName in requiredEvents) {
+        const eventsOfType = this.events.filter(e => e.event === eventName);
+        const requiredParams = requiredEvents[eventName];
+        
+        if (eventsOfType.length === 0) {
+          validationResults[eventName] = '❌ NOT CAPTURED';
+          console.log(`%c❌ ${eventName}`, 'color: red; font-weight: bold;', '- No events captured');
+        } else {
+          let isValid = true;
+          const missingParams = [];
+          
+          eventsOfType.forEach((evt, idx) => {
+            requiredParams.forEach(param => {
+              if (!evt.hasOwnProperty(param)) {
+                isValid = false;
+                missingParams.push(param);
+              }
+            });
+          });
+          
+          if (isValid && eventsOfType[0].hasOwnProperty('timestamp')) {
+            validationResults[eventName] = '✓ VALID';
+            console.log(`%c✓ ${eventName}`, 'color: green; font-weight: bold;', `- ${eventsOfType.length} event(s) captured with all parameters`);
+          } else {
+            validationResults[eventName] = '⚠ INCOMPLETE';
+            console.log(`%c⚠ ${eventName}`, 'color: orange; font-weight: bold;', `- Missing: ${[...new Set(missingParams)].join(', ')}`);
+          }
+        }
+      }
+      
+      console.log('%c=== Summary ===', 'background: #4CAF50; color: white; padding: 10px;');
+      console.table(validationResults);
+      
+      return validationResults;
+    },
+    
+    // Export as JSON for GA4 import
+    exportJSON: function() {
+      const json = JSON.stringify(this.events, null, 2);
+      console.log('%c=== JSON Export ===', 'background: #FF9800; color: white; padding: 10px;');
+      console.log(json);
+      
+      // Also download as file
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(json));
+      element.setAttribute('download', 'dataLayer_events.json');
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      console.log('✓ File downloaded: dataLayer_events.json');
+      return json;
+    },
+    
+    // Get event counts
+    getEventCounts: function() {
+      const counts = {};
+      this.events.forEach(e => {
+        if (e.event) {
+          counts[e.event] = (counts[e.event] || 0) + 1;
+        }
+      });
+      console.table(counts);
+      return counts;
+    },
+    
+    // Get specific event details
+    getEventDetails: function(eventName) {
+      const events = this.getEventsByName(eventName);
+      return events;
+    },
+    
+    // Generate test report
+    generateReport: function() {
+      const report = {
+        timestamp: new Date().toISOString(),
+        totalEvents: this.events.length,
+        uniqueEventTypes: [...new Set(this.events.map(e => e.event))].length,
+        eventCounts: this.getEventCounts(),
+        events: this.events
+      };
+      
+      console.log('%c=== Full Test Report ===', 'background: #673AB7; color: white; padding: 10px;');
+      console.log(report);
+      
+      return report;
+    }
+  };
+  
+  // Auto-initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      DataLayerValidator.init();
+    });
+  } else {
+    DataLayerValidator.init();
+  }
+</script>
+
+<!-- 
+USAGE INSTRUCTIONS:
+
+1. OPEN BROWSER CONSOLE (F12 or Right-click → Inspect → Console)
+
+2. TEST INDIVIDUAL EVENTS:
+   - Click navigation links
+   - Scroll page
+   - Click resume download
+   - Click social links
+   - Click project links
+
+3. RUN VALIDATION COMMANDS:
+   
+   View all captured events:
+   > DataLayerValidator.getAll()
+   
+   Validate all events:
+   > DataLayerValidator.validate()
+   
+   Get count by event type:
+   > DataLayerValidator.getEventCounts()
+   
+   Get specific event type:
+   > DataLayerValidator.getEventsByName('navigation_click')
+   
+   Generate full report:
+   > DataLayerValidator.generateReport()
+   
+   Export as JSON:
+   > DataLayerValidator.exportJSON()
+
+4. EXPECTED RESULTS:
+   ✓ All event names should match data layer events
+   ✓ Each event should have required parameters
+   ✓ Each event should have 'timestamp' field
+   ✓ Parameters should not be empty
+
+5. COMMON ISSUES:
+   ❌ "NOT CAPTURED" - Event not fired (check trigger conditions)
+   ⚠ "INCOMPLETE" - Missing required parameters (add to data layer)
+   
+6. TROUBLESHOOTING:
+   - Check browser console for JavaScript errors
+   - Verify event names match exactly (case-sensitive)
+   - Check parameter names match (case-sensitive)
+   - Wait 1 second after action for event to fire
+-->
